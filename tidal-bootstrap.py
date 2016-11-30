@@ -2,34 +2,12 @@
 
 import os
 import sys
-import urllib
-import urlparse
-# import time
-# from queue import Queue
-import Queue
-from threading import Thread
 
-urls = {
-    'SuperCollider.app': "https://github.com/supercollider/supercollider/releases/download/Version-3.8.0/SuperCollider-3.8.0-OSX.zip",
-    'Atom.app': "https://atom.io/download/mac",
-    'ghci': "https://haskell.org/platform/download/8.0.1/Haskell%20Platform%208.0.1%20Full%2064bit-signed-a.pkg",
-}
-
-
-class DownloadWorker(Thread):
-    def __init__(self, queue):
-        Thread.__init__(self)
-        self.queue = queue
-
-    def run(self):
-        try:
-            while True:
-                # Get the work from the queue
-                dep = self.queue.get()
-                downloadDependecy(dep)
-                self.queue.task_done()
-        except KeyboardInterrupt:
-            print 'Interrupted'
+deps = [
+    'SuperCollider.app',
+    'Atom.app',
+    'ghci'
+]
 
 
 # mimic unix which program
@@ -64,72 +42,91 @@ def appExists(app_name):
     return None
 
 
-def downloadProgress(count, blockSize, totalSize):
-    percent = int(count * blockSize * 100 / totalSize)
-    sys.stdout.write("\r" + "..%d%%" % percent)
-    sys.stdout.flush()
+class Colorize:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+    def disable(self):
+        self.HEADER = ''
+        self.OKBLUE = ''
+        self.OKGREEN = ''
+        self.WARNING = ''
+        self.FAIL = ''
+        self.ENDC = ''
 
 
-def filenameFromURL(url):
-    """Return the filename from an URL"""
-    url = urlparse.urlparse(url).path
-    url = urllib.unquote(url).decode('utf8')
-    path, filename = os.path.split(url)
-    return filename
+def parse_input():
+    """ Parse user input """
+    # raw_input returns the empty string for "enter"
+    yes = set(['yes', 'y',  'ye',  ''])
+    no = set(['no', 'n'])
+
+    while True:
+        choice = raw_input('-> ').lower()
+        if choice not in yes and choice not in no:
+            print "Please respond with 'yes' or 'no'"
+            continue
+        else:
+            if choice in yes:
+                return True
+            elif choice in no:
+                return False
 
 
-def checkStatus(program):
-    success = u'\u2713'
-    error = u'\u2717'
+def isInstalled(program):
+    success = Colorize.OKGREEN + u'\u2713' + Colorize.ENDC
+    error = Colorize.WARNING + u'\u2717' + Colorize.ENDC
 
     if appExists(program) or which(program):
-        print success, program
+        print '\t' + success, program
         return True
     else:
-        print error, program
+        print '\t' + error, program
         return False
 
 
-def downloadDependecy(dep):
-    """Downloads an app dependency"""
+def checkForHomebrew():
+    if which('brew'):
+        return
+    else:
+        print "\nThis script needs `brew` to run!"
+        print "Please install homebrew and run this script again."
+        print "Follow the instructions on the homebrew website:\n"
+        print "\t" + "http://brew.sh/"
+        sys.exit(0)
 
-    # store all downloaded in the current directory
-    download_dir = os.path.abspath('./tidal-deps')
-    # Create a temporary dir where we will download all assets
-    if not os.path.exists(download_dir):
-        os.makedirs(download_dir)
 
-    print "Downloading dependency:", dep
-
-    url = urls[dep]
-    dl_name = filenameFromURL(url)
-    dl_path = os.path.join(download_dir, dl_name)
-    urllib.urlretrieve(url,
-                       dl_path,
-                       downloadProgress)
+targets = []
 
 
 def main():
-    # Create a queue to communicate with the worker threads
-    queue = Queue.Queue()
-    # Create worker threads
-    for x in range(len(urls.keys())):
-        worker = DownloadWorker(queue)
-        # Setting daemon to True will let the main thread exit
-        # even though the workers are blocking
-        worker.daemon = True
-        worker.start()
+    checkForHomebrew()
 
+    print "\nTIDAL BOOTSTRAP\n"
     print "Checking dependencies..\n"
 
-    for program in urls.keys():
-        exists = checkStatus(program)
-        if not exists:
-            queue.put(program)
+    for program in deps:
+        installed = isInstalled(program)
+        if not installed:
+            targets.append(program)
 
-    # Causes the main thread to wait for the
-    # queue to finish processing all the tasks
-    queue.join()
+    if targets:
+        print "\nThe following dependencies needs to be installed:\n"
+        for dep in targets:
+            print '\t* ' + dep
+
+    print "\nDo you wish to install them?"
+    print "y/n (or press Enter to accept)\n"
+
+    if parse_input():
+        # install_dependencies()
+        print "Install"
+    else:
+        print "Okay, quitting"
 
 
 if __name__ == '__main__':
