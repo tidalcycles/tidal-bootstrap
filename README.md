@@ -14,9 +14,9 @@ Summary
 
 The script checks if the following programs are installed on the system:
 
-    * SuperCollider
-    * Atom
-    * ghci (haskell-platform)
+* SuperCollider
+* Atom
+* ghci (haskell-platform)
 
 If it finds that any of the dependencies are missing, it will ask if the user would like to download the missing dependencies.
 
