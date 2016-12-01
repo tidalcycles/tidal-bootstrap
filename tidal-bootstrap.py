@@ -80,7 +80,7 @@ def parse_input():
 
 def is_installed(program):
     success = Colorize.OKGREEN + u'\u2713' + Colorize.ENDC
-    error = Colorize.WARNING + u'\u2717' + Colorize.ENDC
+    error = Colorize.FAIL + u'\u2717' + Colorize.ENDC
 
     if app_exists(program) or which(program):
         print '\t' + success, program
@@ -130,14 +130,34 @@ def welcome():
         sys.exit(0)
 
 
-targets = []
+# TODO: Make this parallel using subprocess.Popen
+def install_dep(cmd, name):
+    print "Installing:", name
+    if name == 'ghci':
+        name = 'haskell-platform'
+
+    command = cmd.split()
+    command.append(name)
+
+    return_code = subprocess.call(command)
+    if return_code != 0:
+        print "Could not install", name, "quitting."
+        sys.exit(0)
+
+
+def install_dependencies(targets):
+    # See if user has installed homebrew, otherwise we quit here
+    check_brew()
+
+    for program in targets:
+        name, ext = os.path.splitext(program)
+        install_dep('brew cask install', name.lower())
+
+    print "\nAll dependencies installed!"
 
 
 def main():
     welcome()
-    # See if user has installed homebrew, otherwise we quit here
-    check_brew()
-
     print "Checking dependencies..\n"
 
     targets = []
@@ -150,7 +170,7 @@ def main():
     if targets:
         print "\nThe following dependencies needs to be installed:\n"
         for dep in targets:
-            print '\t* ' + dep
+            print Colorize.OKBLUE + '\t- ' + dep + Colorize.ENDC
 
         print "\nDo you wish to install them?"
         print "y/n (or press Enter to accept)\n"
