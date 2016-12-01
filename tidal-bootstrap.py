@@ -29,15 +29,15 @@ def which(program):
     return None
 
 
-def appExists(app_name):
-    def isFile(path):
+def app_exists(app_name):
+    def is_file(path):
         return os.path.isdir(path) and path.endswith('.app')
 
     app_dirs = ['/Applications', os.path.expanduser('~/Applications')]
 
     for dir in app_dirs:
         app_path = os.path.join(dir, app_name)
-        return isFile(app_path)
+        return is_file(app_path)
 
     return None
 
@@ -77,11 +77,11 @@ def parse_input():
                 return False
 
 
-def isInstalled(program):
+def is_installed(program):
     success = Colorize.OKGREEN + u'\u2713' + Colorize.ENDC
     error = Colorize.WARNING + u'\u2717' + Colorize.ENDC
 
-    if appExists(program) or which(program):
+    if app_exists(program) or which(program):
         print '\t' + success, program
         return True
     else:
@@ -89,7 +89,7 @@ def isInstalled(program):
         return False
 
 
-def checkForHomebrew():
+def check_brew():
     if which('brew'):
         return
     else:
@@ -104,13 +104,13 @@ targets = []
 
 
 def main():
-    checkForHomebrew()
+    check_brew()
 
     print "\nTIDAL BOOTSTRAP\n"
     print "Checking dependencies..\n"
 
     for program in deps:
-        installed = isInstalled(program)
+        installed = is_installed(program)
         if not installed:
             targets.append(program)
 
