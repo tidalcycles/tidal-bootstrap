@@ -92,7 +92,7 @@ def is_installed(program):
 
 def setup_cask():
     print "Setting up brew cask.. (this could take a while)"
-    return_code = subprocess.call('brew tap caskroom/cask', shell=True)
+    return_code = subprocess.call(['brew', 'tap', 'caskroom/cask'])
     if return_code != 0:
         print "Could not setup `brew cask`, quitting."
         sys.exit(0)
