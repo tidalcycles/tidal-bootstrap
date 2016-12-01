@@ -2,6 +2,7 @@
 
 import os
 import sys
+import subprocess
 
 deps = [
     'SuperCollider.app',
@@ -100,13 +101,43 @@ def check_brew():
         sys.exit(0)
 
 
+def setup_cask():
+    print "Setting up brew cask.. (this could take a while)"
+    return_code = subprocess.call('brew tap caskroom/cask', shell=True)
+    if return_code != 0:
+        print "Could not setup `brew cask`, quitting."
+        sys.exit(0)
+
+
+def welcome():
+    print "==============="
+    print "TIDAL BOOTSTRAP"
+    print "==============="
+    print "\nThis script will check if you have all dependencies (programs)"
+    print "installed on your system to begin working with TidalCycles.\n"
+    print ("If a dependency is missing the script will try "
+           + "to download and install it for you.\n")
+
+    print "Do you wish to continue?"
+    print "y/n (or press Enter to continue)\n"
+
+    if parse_input():
+        return
+    else:
+        print "Okay, qutting."
+        sys.exit(0)
+
+
 targets = []
 
 
 def main():
+    welcome()
+    # See if user has installed homebrew, otherwise we quit here
     check_brew()
+    # Get brew cask
+    setup_cask()
 
-    print "\nTIDAL BOOTSTRAP\n"
     print "Checking dependencies..\n"
 
     for program in deps:
