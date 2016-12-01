@@ -90,22 +90,24 @@ def is_installed(program):
         return False
 
 
+def setup_cask():
+    print "Setting up brew cask.. (this could take a while)"
+    return_code = subprocess.call('brew tap caskroom/cask', shell=True)
+    if return_code != 0:
+        print "Could not setup `brew cask`, quitting."
+        sys.exit(0)
+
+
 def check_brew():
     if which('brew'):
+        # Get brew cask
+        setup_cask()
         return
     else:
         print "\nThis script needs `brew` to run!"
         print "Please install homebrew and run this script again."
         print "Follow the instructions on the homebrew website:\n"
         print "\t" + "http://brew.sh/"
-        sys.exit(0)
-
-
-def setup_cask():
-    print "Setting up brew cask.. (this could take a while)"
-    return_code = subprocess.call('brew tap caskroom/cask', shell=True)
-    if return_code != 0:
-        print "Could not setup `brew cask`, quitting."
         sys.exit(0)
 
 
@@ -135,8 +137,6 @@ def main():
     welcome()
     # See if user has installed homebrew, otherwise we quit here
     check_brew()
-    # Get brew cask
-    setup_cask()
 
     print "Checking dependencies..\n"
 
