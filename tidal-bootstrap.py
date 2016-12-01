@@ -140,6 +140,8 @@ def main():
 
     print "Checking dependencies..\n"
 
+    targets = []
+
     for program in deps:
         installed = is_installed(program)
         if not installed:
@@ -150,14 +152,16 @@ def main():
         for dep in targets:
             print '\t* ' + dep
 
-    print "\nDo you wish to install them?"
-    print "y/n (or press Enter to accept)\n"
+        print "\nDo you wish to install them?"
+        print "y/n (or press Enter to accept)\n"
 
-    if parse_input():
-        # install_dependencies()
-        print "Install"
+        if parse_input():
+            install_dependencies(targets)
+        else:
+            print "Okay, quitting."
     else:
-        print "Okay, quitting"
+        print "\nAll dependencies found!"
+        sys.exit(0)
 
 
 if __name__ == '__main__':
