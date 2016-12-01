@@ -1,0 +1,6 @@
+{
+  "name": "tidal-bootstrap",
+  "tagline": "",
+  "body": "tidal-bootstrap is small python script which attempts to ease the installation process of the TidalCycles programming environment. It only works on OS X for the moment.",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
