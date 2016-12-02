@@ -145,7 +145,7 @@ def install_dep(cmd, name):
         sys.exit(0)
 
 
-def install_dependencies(targets):
+def install_app_dependencies(targets):
     # See if user has installed homebrew, otherwise we quit here
     check_brew()
 
@@ -153,7 +153,54 @@ def install_dependencies(targets):
         name, ext = os.path.splitext(program)
         install_dep('brew cask install', name.lower())
 
-    print "\nAll dependencies installed!"
+    print "\nAll app dependencies installed!"
+
+
+def check_packages():
+    print "\nChecking packages.."
+    check_tidal()
+    check_atom_plugin()
+    check_sc_quarks()
+
+
+def check_atom_plugin():
+    print "Checking if tidal atom package is installed.."
+    output = subprocess.check_output('apm list | grep tidal', shell=True)
+    if output:
+        print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
+    else:
+        return_code = subprocess.call(['apm', 'install', 'tidalcycles'])
+        if return_code != 0:
+            print "Could not install tidalcycles atom package!"
+            print "Try to install from Atom.app instead?"
+
+
+def check_tidal():
+    print "Checking if tidal package is installed.."
+    output = subprocess.check_output('ghc-pkg list | grep tidal', shell=True)
+    if output:
+        print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
+    else:
+        print "Installing tidal.."
+        return_code = subprocess.call(['cabal', 'install', 'tidal'])
+        if return_code != 0:
+            print "Could not install tidal!"
+
+
+def check_sc_quarks():
+    dirt_path = os.path.expanduser(
+        ('~/Library/Application Support/SuperCollider'
+         + '/downloaded-quarks/SuperDirt')
+    )
+
+    if not os.path.isdir(dirt_path):
+        print "SuperDirt audio engine was not found"
+        print ("Please open the file: "
+               + Colorize.OKGREEN + "install-superdirt-quark.scd"
+               + Colorize.ENDC
+               + "in SuperCollider to install SuperDirt")
+    else:
+        print Colorize.OKGREEN + "Found:", dirt_path + Colorize.ENDC
 
 
 def main():
@@ -176,12 +223,14 @@ def main():
         print "y/n (or press Enter to accept)\n"
 
         if parse_input():
-            install_dependencies(targets)
+            install_app_dependencies(targets)
         else:
             print "Okay, quitting."
     else:
-        print "\nAll dependencies found!"
-        sys.exit(0)
+        print "\nAll app dependencies found!"
+
+    # See if we need to install additional packages
+    check_packages()
 
 
 if __name__ == '__main__':
