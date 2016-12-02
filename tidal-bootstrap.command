@@ -168,7 +168,12 @@ def check_packages():
 
 def check_atom_plugin():
     print "Checking if tidal atom package is installed.."
-    output = subprocess.check_output('apm list | grep tidal', shell=True)
+    try:
+        output = subprocess.check_output('apm list | grep tidal',
+                                         shell=True)
+    except subprocess.CalledProcessError, err:
+        output = err.output
+
     if output:
         print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
     else:
@@ -180,7 +185,12 @@ def check_atom_plugin():
 
 def check_tidal():
     print "Checking if tidal package is installed.."
-    output = subprocess.check_output('ghc-pkg list | grep tidal', shell=True)
+    try:
+        output = subprocess.check_output('ghc-pkg list | grep tidal',
+                                         shell=True)
+    except subprocess.CalledProcessError, err:
+        output = err.output
+
     if output:
         print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
     else:
