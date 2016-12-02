@@ -67,15 +67,18 @@ def parse_input():
     no = set(['no', 'n'])
 
     while True:
-        choice = raw_input('-> ').lower()
-        if choice not in yes and choice not in no:
-            print "Please respond with 'yes' or 'no'"
-            continue
-        else:
-            if choice in yes:
-                return True
-            elif choice in no:
-                return False
+        try:
+            choice = raw_input('-> ').lower()
+            if choice not in yes and choice not in no:
+                print "Please respond with 'yes' or 'no'"
+                continue
+            else:
+                if choice in yes:
+                    return True
+                elif choice in no:
+                    return False
+        except (KeyboardInterrupt, SystemExit):
+            sys.exit(0)
 
 
 def is_installed(program):
