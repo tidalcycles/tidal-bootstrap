@@ -271,6 +271,7 @@ def main():
             install_app_dependencies(targets)
         else:
             print "Okay, quitting."
+            sys.exit(0)
     else:
         print "\nAll app dependencies found!"
 
