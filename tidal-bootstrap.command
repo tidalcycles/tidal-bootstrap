@@ -60,6 +60,10 @@ class Colorize:
         self.ENDC = ''
 
 
+success_mark = Colorize.OKGREEN + u'\u2713' + Colorize.ENDC
+error_mark = Colorize.FAIL + u'\u2717' + Colorize.ENDC
+
+
 def parse_input():
     """ Parse user input """
     # raw_input returns the empty string for "enter"
@@ -82,14 +86,11 @@ def parse_input():
 
 
 def is_installed(program):
-    success = Colorize.OKGREEN + u'\u2713' + Colorize.ENDC
-    error = Colorize.FAIL + u'\u2717' + Colorize.ENDC
-
     if app_exists(program) or which(program):
-        print '\t' + success, program
+        print '\t' + success_mark, program
         return True
     else:
-        print '\t' + error, program
+        print '\t' + error_mark, program
         return False
 
 
@@ -175,7 +176,7 @@ def check_atom_plugin():
         output = err.output
 
     if output:
-        print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
+        print success_mark, output
     else:
         return_code = subprocess.call(['apm', 'install', 'tidalcycles'])
         if return_code != 0:
@@ -192,7 +193,7 @@ def check_tidal():
         output = err.output
 
     if output:
-        print Colorize.OKGREEN + "Found:", output + Colorize.ENDC
+        print success_mark, output
     else:
         print "Installing tidal.."
         return_code = subprocess.call(['cabal', 'install', 'tidal'])
@@ -201,6 +202,7 @@ def check_tidal():
 
 
 def check_sc_quarks():
+    print "Checking if SuperDirt quark is installed.."
     dirt_path = os.path.expanduser(
         ('~/Library/Application Support/SuperCollider'
          + '/downloaded-quarks/SuperDirt')
@@ -213,7 +215,7 @@ def check_sc_quarks():
                + Colorize.ENDC
                + "in SuperCollider to install SuperDirt")
     else:
-        print Colorize.OKGREEN + "Found:", dirt_path + Colorize.ENDC
+        print success_mark, dirt_path
 
 
 def main():
