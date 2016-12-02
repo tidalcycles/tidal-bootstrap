@@ -1,6 +1,6 @@
 {
   "name": "tidal-bootstrap",
-  "tagline": "",
-  "body": "tidal-bootstrap is small python script which attempts to ease the installation process of the TidalCycles programming environment. It only works on OS X for the moment.",
+  "tagline": "Quick install of TidalCycles programming environment",
+  "body": "# Description\r\n\r\ntidal-bootstrap is small python script which attempts to ease the installation process of the TidalCycles programming environment. It only works on OS X for the moment.\r\n\r\n# Usage\r\n\r\n1) If you don't have homebrew you first need to install it. Follow the instructions on the [homebrew page](http://brew.sh/).\r\n\r\nIf you are not sure if you have homebrew or not, open up at Terminal (Spotlight -> Terminal) and type: `which brew` if nothing happens you don't have homebrew and need to install it.\r\n\r\n2) Download the zip file from this page and extract it somewhere (like your desktop)\r\n\r\n3) Open the folder and double-click on the file `tidal-bootstrap.command`, a Terminal window will pop up and you will get further instructions.\r\n\r\n4) Go make some music with [TidalCycles](http://tidalcycles.org/) :)",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
