@@ -162,9 +162,33 @@ def install_app_dependencies(targets):
 
 def check_packages():
     print "\nChecking packages.."
-    check_tidal()
-    check_atom_plugin()
-    check_sc_quarks()
+    has_tidal = check_tidal()
+    has_atom_pkg = check_atom_plugin()
+    has_sc_quark = check_sc_quarks()
+
+    found_pkgs = [has_tidal, has_atom_pkg, has_sc_quark]
+
+    if found_pkgs.count(True) == 3:
+        print Colorize.OKGREEN + "\nAll packages are installed!"+Colorize.ENDC
+    elif not has_tidal or not has_atom_pkg:
+        print Colorize.WARNING
+        + "Sorry, all packages could not be installed"
+        + Colorize.ENDC
+
+        if not has_tidal:
+            print "Tidal cabal package could not be installed"
+        if not has_atom_pkg:
+            print "Atom tidal package could not be installed"
+
+        print ("Visit: http://tidalcycles.org/getting_started.html "
+               + "and install them using the instructions found there")
+
+    if not has_sc_quark:
+        print "The SuperDirt quark was not found"
+        print ("Please open the file: "
+               + Colorize.OKGREEN + "install-superdirt-quark.scd"
+               + Colorize.ENDC
+               + "in SuperCollider to install SuperDirt")
 
 
 def check_atom_plugin():
@@ -177,11 +201,15 @@ def check_atom_plugin():
 
     if output:
         print success_mark, output
+        return True
     else:
         return_code = subprocess.call(['apm', 'install', 'tidalcycles'])
         if return_code != 0:
             print "Could not install tidalcycles atom package!"
-            print "Try to install from Atom.app instead?"
+            print "Try to install from Atom.app instead"
+            return False
+        else:
+            return True
 
 
 def check_tidal():
@@ -194,11 +222,15 @@ def check_tidal():
 
     if output:
         print success_mark, output
+        return True
     else:
         print "Installing tidal.."
         return_code = subprocess.call(['cabal', 'install', 'tidal'])
         if return_code != 0:
             print "Could not install tidal!"
+            return False
+        else:
+            return True
 
 
 def check_sc_quarks():
@@ -209,13 +241,11 @@ def check_sc_quarks():
     )
 
     if not os.path.isdir(dirt_path):
-        print "SuperDirt audio engine was not found"
-        print ("Please open the file: "
-               + Colorize.OKGREEN + "install-superdirt-quark.scd"
-               + Colorize.ENDC
-               + "in SuperCollider to install SuperDirt")
+        print "SuperDirt quark was not found"
+        return False
     else:
         print success_mark, dirt_path
+        return True
 
 
 def main():
