@@ -29,4 +29,4 @@ It uses [homebrew](http://brew.sh/) (specifically [homebrew-cask](https://github
 Troubleshooting
 ---------------
 
-If Haskell < 7.10 is currently installed, you will not be able to install Tidal because [Haskell 7.8 broke in El Capitan](https://ghc.haskell.org/trac/ghc/blog/weekly20150721#MacOSXElCapitansupport). Uninstall ghc and cabal-install and try again.
+If Haskell < 7.10 is currently installed, you will not be able to install Tidal because [Haskell 7.8 broke in El Capitan](https://ghc.haskell.org/trac/ghc/blog/weekly20150721#MacOSXElCapitansupport). Uninstall ghc and cabal-install and try again. It may also be necessary to delete all libraries installed with the old cabal by running `rm -rf ~/.cabal`.
