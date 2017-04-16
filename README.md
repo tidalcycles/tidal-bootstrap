@@ -25,3 +25,8 @@ If it finds that any of the dependencies are missing, it will ask if the user wo
 Additionally, it will install the [Tidal package](https://hackage.haskell.org/package/tidal), the [Atom plugin](https://atom.io/users/tidalcycles), and check the presence of the SuperCollider [SuperDirt quark](https://github.com/musikinformatik/SuperDirt).
 
 It uses [homebrew](http://brew.sh/) (specifically [homebrew-cask](https://github.com/caskroom/homebrew-cask)) to fetch and install the different dependencies.
+
+Troubleshooting
+---------------
+
+If Haskell < 7.10 is currently installed, you will not be able to install Tidal because [Haskell 7.8 broke in El Capitan](https://ghc.haskell.org/trac/ghc/blog/weekly20150721#MacOSXElCapitansupport). Uninstall ghc and cabal-install and try again.
