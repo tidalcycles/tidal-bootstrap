@@ -171,9 +171,11 @@ def check_packages():
     if found_pkgs.count(True) == 3:
         print Colorize.OKGREEN + "\nAll packages are installed!"+Colorize.ENDC
     elif not has_tidal or not has_atom_pkg:
-        print Colorize.WARNING
-        + "Sorry, all packages could not be installed"
-        + Colorize.ENDC
+        print (
+            Colorize.WARNING
+            + "Sorry, all packages could not be installed"
+            + Colorize.ENDC
+        )
 
         if not has_tidal:
             print "Tidal cabal package could not be installed"
@@ -184,11 +186,11 @@ def check_packages():
                + "and install them using the instructions found there")
 
     if not has_sc_quark:
-        print "The SuperDirt quark was not found"
         print ("Please open the file: "
-               + Colorize.OKGREEN + "install-superdirt-quark.scd"
+               + Colorize.OKGREEN
+               + "install-superdirt-quark.scd"
                + Colorize.ENDC
-               + "in SuperCollider to install SuperDirt")
+               + " in SuperCollider to install SuperDirt")
 
 
 def check_atom_plugin():
