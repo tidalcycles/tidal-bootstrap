@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+if sys.version[0]=="3": raw_input=input
 
 deps = [
     'SuperCollider.app',
@@ -72,7 +73,8 @@ def parse_input():
 
     while True:
         try:
-            choice = raw_input('-> ').lower()
+            choice = raw_input('-> ').lower() 
+
             if choice not in yes and choice not in no:
                 print("Please respond with 'yes' or 'no'")
                 continue
@@ -198,7 +200,7 @@ def check_atom_plugin():
     try:
         output = subprocess.check_output('apm list | grep tidal',
                                          shell=True)
-    except subprocess.CalledProcessError, err:
+    except subprocess.CalledProcessError as e:
         output = err.output
 
     if output:
@@ -219,7 +221,7 @@ def check_tidal():
     try:
         output = subprocess.check_output('ghc-pkg list | grep tidal',
                                          shell=True)
-    except subprocess.CalledProcessError, err:
+    except subprocess.CalledProcessError as e:
         output = err.output
 
     if output:
