@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import os
 import sys
@@ -74,7 +74,7 @@ def parse_input():
         try:
             choice = raw_input('-> ').lower()
             if choice not in yes and choice not in no:
-                print "Please respond with 'yes' or 'no'"
+                print("Please respond with 'yes' or 'no'")
                 continue
             else:
                 if choice in yes:
@@ -87,18 +87,18 @@ def parse_input():
 
 def is_installed(program):
     if app_exists(program) or which(program):
-        print '\t' + success_mark, program
+        print('\t' + success_mark, program)
         return True
     else:
-        print '\t' + error_mark, program
+        print('\t' + error_mark, program)
         return False
 
 
 def setup_cask():
-    print "Setting up brew cask.. (this could take a while)"
+    print("Setting up brew cask.. (this could take a while)")
     return_code = subprocess.call(['brew', 'tap', 'caskroom/cask'])
     if return_code != 0:
-        print "Could not setup `brew cask`, quitting."
+        print("Could not setup `brew cask`, quitting.")
         sys.exit(0)
 
 
@@ -108,35 +108,35 @@ def check_brew():
         setup_cask()
         return
     else:
-        print "\nThis script needs `brew` to run!"
-        print "Please install homebrew and run this script again."
-        print "Follow the instructions on the homebrew website:\n"
-        print "\t" + "http://brew.sh/"
+        print("\nThis script needs `brew` to run!")
+        print("Please install homebrew and run this script again.")
+        print("Follow the instructions on the homebrew website:\n")
+        print("\t" + "http://brew.sh/")
         sys.exit(0)
 
 
 def welcome():
-    print "==============="
-    print "TIDAL BOOTSTRAP"
-    print "==============="
-    print "\nThis script will check if you have all dependencies (programs)"
-    print "installed on your system to begin working with TidalCycles.\n"
+    print("===============")
+    print("TIDAL BOOTSTRAP")
+    print("===============")
+    print("\nThis script will check if you have all dependencies (programs)")
+    print("installed on your system to begin working with TidalCycles.\n")
     print ("If a dependency is missing the script will try "
            + "to download and install it for you.\n")
 
-    print "Do you wish to continue?"
-    print "y/n (or press Enter to continue)\n"
+    print("Do you wish to continue?")
+    print("y/n (or press Enter to continue)\n")
 
     if parse_input():
         return
     else:
-        print "Okay, qutting."
+        print("Okay, qutting.")
         sys.exit(0)
 
 
 # TODO: Make this parallel using subprocess.Popen
 def install_dep(cmd, name):
-    print "Installing:", name
+    print("Installing:", name)
     if name == 'ghci':
         name = 'haskell-platform'
 
@@ -145,7 +145,7 @@ def install_dep(cmd, name):
 
     return_code = subprocess.call(command)
     if return_code != 0:
-        print "Could not install", name, "quitting."
+        print("Could not install", name, "quitting.")
         sys.exit(0)
 
 
@@ -157,11 +157,11 @@ def install_app_dependencies(targets):
         name, ext = os.path.splitext(program)
         install_dep('brew cask install', name.lower())
 
-    print "\nAll app dependencies installed!"
+    print("\nAll app dependencies installed!")
 
 
 def check_packages():
-    print "\nChecking packages.."
+    print("\nChecking packages..")
     has_tidal = check_tidal()
     has_atom_pkg = check_atom_plugin()
     has_sc_quark = check_sc_quarks()
@@ -169,7 +169,7 @@ def check_packages():
     found_pkgs = [has_tidal, has_atom_pkg, has_sc_quark]
 
     if found_pkgs.count(True) == 3:
-        print Colorize.OKGREEN + "\nAll packages are installed!"+Colorize.ENDC
+        print(Colorize.OKGREEN + "\nAll packages are installed!"+Colorize.ENDC)
     elif not has_tidal or not has_atom_pkg:
         print (
             Colorize.WARNING
@@ -178,9 +178,9 @@ def check_packages():
         )
 
         if not has_tidal:
-            print "Tidal cabal package could not be installed"
+            print("Tidal cabal package could not be installed")
         if not has_atom_pkg:
-            print "Atom tidal package could not be installed"
+            print("Atom tidal package could not be installed")
 
         print ("Visit: http://tidalcycles.org/getting_started.html "
                + "and install them using the instructions found there")
@@ -194,7 +194,7 @@ def check_packages():
 
 
 def check_atom_plugin():
-    print "Checking if tidal atom package is installed.."
+    print("Checking if tidal atom package is installed..")
     try:
         output = subprocess.check_output('apm list | grep tidal',
                                          shell=True)
@@ -202,20 +202,20 @@ def check_atom_plugin():
         output = err.output
 
     if output:
-        print success_mark, output
+        print(success_mark, output)
         return True
     else:
         return_code = subprocess.call(['apm', 'install', 'tidalcycles'])
         if return_code != 0:
-            print "Could not install tidalcycles atom package!"
-            print "Try to install from Atom.app instead"
+            print("Could not install tidalcycles atom package!")
+            print("Try to install from Atom.app instead")
             return False
         else:
             return True
 
 
 def check_tidal():
-    print "Checking if tidal package is installed.."
+    print("Checking if tidal package is installed..")
     try:
         output = subprocess.check_output('ghc-pkg list | grep tidal',
                                          shell=True)
@@ -223,36 +223,36 @@ def check_tidal():
         output = err.output
 
     if output:
-        print success_mark, output
+        print(success_mark, output)
         return True
     else:
-        print "Installing tidal.."
+        print("Installing tidal..")
         return_code = subprocess.call(['cabal', 'install', 'tidal'])
         if return_code != 0:
-            print "Could not install tidal!"
+            print("Could not install tidal!")
             return False
         else:
             return True
 
 
 def check_sc_quarks():
-    print "Checking if SuperDirt quark is installed.."
+    print("Checking if SuperDirt quark is installed..")
     dirt_path = os.path.expanduser(
         ('~/Library/Application Support/SuperCollider'
          + '/downloaded-quarks/SuperDirt')
     )
 
     if not os.path.isdir(dirt_path):
-        print "SuperDirt quark was not found"
+        print("SuperDirt quark was not found")
         return False
     else:
-        print success_mark, dirt_path
+        print(success_mark, dirt_path)
         return True
 
 
 def main():
     welcome()
-    print "Checking dependencies..\n"
+    print("Checking dependencies..\n")
 
     targets = []
 
@@ -262,20 +262,20 @@ def main():
             targets.append(program)
 
     if targets:
-        print "\nThe following dependencies needs to be installed:\n"
+        print("\nThe following dependencies needs to be installed:\n")
         for dep in targets:
-            print Colorize.OKBLUE + '\t- ' + dep + Colorize.ENDC
+            print(Colorize.OKBLUE + '\t- ' + dep + Colorize.ENDC)
 
-        print "\nDo you wish to install them?"
-        print "y/n (or press Enter to accept)\n"
+        print("\nDo you wish to install them?")
+        print("y/n (or press Enter to accept)\n")
 
         if parse_input():
             install_app_dependencies(targets)
         else:
-            print "Okay, quitting."
+            print("Okay, quitting.")
             sys.exit(0)
     else:
-        print "\nAll app dependencies found!"
+        print("\nAll app dependencies found!")
 
     # See if we need to install additional packages
     check_packages()
