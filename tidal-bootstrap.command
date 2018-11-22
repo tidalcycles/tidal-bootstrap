@@ -138,7 +138,7 @@ def welcome():
 def install_dep(cmd, name):
     print "Installing:", name
     if name == 'ghci':
-        name = 'haskell-platform'
+        name = 'ghc cabal-install stack'
 
     command = cmd.split()
     command.append(name)
