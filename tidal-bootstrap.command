@@ -137,9 +137,6 @@ def welcome():
 # TODO: Make this parallel using subprocess.Popen
 def install_dep(cmd, name):
     print "Installing:", name
-    if name == 'ghci':
-        name = 'haskell-platform'
-
     command = cmd.split()
     command.append(name)
 
@@ -155,7 +152,13 @@ def install_app_dependencies(targets):
 
     for program in targets:
         name, ext = os.path.splitext(program)
-        install_dep('brew cask install', name.lower())
+        name = name.lower()
+        if name == 'ghci':
+            install_dep('brew install', 'ghc')
+            install_dep('brew install', 'cabal-install')
+            install_dep('brew install', 'stack')
+        else:
+            install_dep('brew cask install', name)
 
     print "\nAll app dependencies installed!"
 
@@ -227,6 +230,7 @@ def check_tidal():
         return True
     else:
         print "Installing tidal.."
+        return_code = subprocess.call(['cabal', 'update'])
         return_code = subprocess.call(['cabal', 'install', 'tidal'])
         if return_code != 0:
             print "Could not install tidal!"
