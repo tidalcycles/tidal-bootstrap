@@ -26,7 +26,7 @@ The script checks if the following programs are installed on the system, and ins
 Running
 -------
 
-You should be able to run this script by opening a terminal window, pasting in the following and pressing enter:
+You should be able to run the install script by opening a terminal window, pasting in the following and pressing enter:
 
 ```
 curl https://raw.githubusercontent.com/tidalcycles/tidal-bootstrap/master/tidal-bootstrap.command -sSf | sh
