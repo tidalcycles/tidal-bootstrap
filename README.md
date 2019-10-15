@@ -29,5 +29,5 @@ Running
 You should be able to run the install script by opening a terminal window, pasting in the following and pressing enter:
 
 ```
-curl https://raw.githubusercontent.com/tidalcycles/tidal-bootstrap/master/tidal-bootstrap.command -sSf | sh
+curl https://tidalcycles.org/tidal-bootstrap.sh -sSf | sh
 ```
