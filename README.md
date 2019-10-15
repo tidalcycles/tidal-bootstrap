@@ -10,9 +10,9 @@ successes too!
 Summary
 -------
 
-`tidal-bootstrap` is small shell script which attempts to ease the
+`tidal-bootstrap` is small shell script which attempts to automate the
 installation process of the [TidalCycles](http://tidalcycles.org/)
-programming environment under Mac OS X.
+live coding environment under Mac OS X.
 
 `tidal-bootstrap` installs the tools mentioned in TidalCycles [Getting Started](http://tidalcycles.org/getting_started.html) guide.
 
@@ -31,3 +31,5 @@ You should be able to run the install script by opening a terminal window, pasti
 ```
 curl https://tidalcycles.org/tidal-bootstrap.sh -sSf | sh
 ```
+
+(It will probably ask for your password at some point. As you type, characters won't be echoed to the screen, so you'll have to look at your keys and do your best!)
