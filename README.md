@@ -14,7 +14,7 @@ Summary
 installation process of the [TidalCycles](http://tidalcycles.org/)
 live coding environment under Mac OS X.
 
-`tidal-bootstrap` installs the tools mentioned in TidalCycles [Getting Started](http://tidalcycles.org/getting_started.html) guide.
+`tidal-bootstrap` installs the tools mentioned in TidalCycles [installation](https://tidalcycles.org/index.php/Installation) guide.
 
 The script checks if the following programs are installed on the system, and installs them if they are missing.
 
