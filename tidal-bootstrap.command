@@ -79,7 +79,7 @@ if [ -e "~/Library/Application\ Support/SuperCollider/Extensions/StkInst.scx" ];
 else
     #### INSTALL PLUGINS
     printf "$COLOR_PURPLE[8]$normal Installing SuperCollider Plugins...\n"
-    curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.10.0/sc3-plugins-3.10.0-macOS.zip --output /tmp/sc3plugins.zip
+    curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.10.0/sc3-plugins-3.10.0-macOS-signed.zip --output /tmp/sc3plugins.zip
     mkdir -p ~/Library/Application\ Support/SuperCollider/Extensions/
     unzip -q /tmp/sc3plugins.zip -d ~/Library/Application\ Support/SuperCollider/Extensions/
     rm /tmp/sc3plugins.zip
