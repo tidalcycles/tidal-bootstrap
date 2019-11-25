@@ -87,7 +87,7 @@ fi
 
 #### INSTALL SUPERDIRT
 echo "$COLOR_PURPLE[9]$normal Installing the SuperDirt synths and samples (will take some time..)"
-echo 'Quarks.install("https://github.com/musikinformatik/SuperDirt.git");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
+echo 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
 
 echo "Tidal and SuperDirt should now be installed!\n\n"
 
