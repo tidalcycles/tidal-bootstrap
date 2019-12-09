@@ -4,7 +4,7 @@
 # Date: September 2019
 # Last Updated: October 2019
 # Contact: james@jamescampbell.us / alex@slab.org
-# What: tidalcycles installer script for OSX
+# What: tidalcycles installer script for OSX and Linux
 
 #### COLORS
 COLOR_PURPLE='\033[0;35m'
