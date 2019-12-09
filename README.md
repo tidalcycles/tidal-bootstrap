@@ -12,7 +12,7 @@ Summary
 
 `tidal-bootstrap` is small shell script which attempts to automate the
 installation process of the [TidalCycles](http://tidalcycles.org/)
-live coding environment under Mac OS X.
+live coding environment under Mac OS X and Linux (on Debian-derived systems, e.g. Ubuntu, Mint).
 
 `tidal-bootstrap` installs the tools mentioned in TidalCycles [installation](https://tidalcycles.org/index.php/Installation) guide.
 
