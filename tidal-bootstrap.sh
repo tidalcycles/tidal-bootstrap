@@ -183,70 +183,40 @@ echo "  Distro version: $(get_distro_ver)"
 
 mydistro=$(get_distro_alias "$(get_distro_name)")
 
-#### CHECK FOR GIT
-if test "${mydistro}" = "darwin"; then
-    if command -v git 2>/dev/null; then
-	printf "$COLOR_PURPLE[1]$normal 'git' command already installed.\n"
-    else
-	printf "$COLOR_PURPLE[1]$normal 'git' required, installing commandline tools..."
-	printf "** Please click 'install' when a popup appears, and wait until it finishes installing. **\n"
-	/usr/bin/xcode-select --install
-        printf "\nWhen that's done, click on this window and press enter to continue."
-        read -r answer </dev/tty
-    fi
+#### CHECK FOR NIX
+if [ -e /home/alex/.nix-profile/etc/profile.d/nix.sh ]; then
+    printf "$COLOR_PURPLE[2]$normal Nix found...\n"
+    . /home/alex/.nix-profile/etc/profile.d/nix.sh
 else
-    # Don't bother checking to see if they're there or not. Apt will
-    # do that!
-    printf "$COLOR_PURPLE[1]$normal Installing build tools (via apt)...\n"
-    sudo apt-get install -qqy git build-essential libgmp-dev
-fi
-
-#### CHECK FOR HASKELL
-if [ -e ~/.ghcup/bin/cabal ]; then
-	printf "$COLOR_PURPLE[2]$normal Haskell found, skipping install of that...\n"
-else
-	printf "$COLOR_PURPLE[2]$normal Installing Haskell (via 'ghcup')...\n"
-        curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
-        if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
-            printf "$COLOR_PURPLE[2.1]$normal Adding ghcup initialisation to ~/.bashrc...\n"
-            echo '. $HOME/.ghcup/env' >> "$HOME/.bashrc"
-        fi
+    printf "$COLOR_PURPLE[2]$normal Installing Nix...\n"
+    curl -L https://nixos.org/nix/install | sh
 fi
 
 #### INSTALL TIDALCYCLES
 printf "$COLOR_PURPLE[3]$normal Congratulations, you have all the pre-reqs...\n"
-echo "Installing tidalcycles haskell library (via cabal)..."
+echo "Installing tidalcycles haskell library (via nix)..."
 echo ""
-. "$HOME/.ghcup/env"
-cabal v2-update
-cabal v2-install tidal --lib
+nix-env -iA nixpkgs.haskellPackages.tidal_1_4_9
 
-#### INSTALL ATOM
-if test "${mydistro}" = "darwin"; then
-    if [ -d "/Applications/Atom.app" ]; then
-	printf "$COLOR_PURPLE[4]$normal Atom already installed, skipping...\n"
-    else
-	printf "$COLOR_PURPLE[4]$normal Installing Atom...\n"
-	curl -Lk https://atom.io/download/mac --output /tmp/atom.zip
-	unzip -q "/tmp/atom.zip" -d /Applications
-	rm /tmp/atom.zip
-    fi
-else
-    if command -v atom 2>/dev/null; then
-	printf "$COLOR_PURPLE[4]$normal Atom already installed.\n"
-    else
-	printf "$COLOR_PURPLE[4]$normal Downloading and installing the Atom editor...\n"
-	curl -Lk https://atom.io/download/deb --output /tmp/atom.deb
-	sudo apt -qqy install /tmp/atom.deb
-	rm /tmp/atom.deb
-    fi
-fi
+#### INSTALL
+printf "$COLOR_PURPLE[4]$normal Installing Atom...\n"
+nix-env -i atom
 
 printf "$COLOR_PURPLE[6]$normal Installing atom TidalCycles plugin...\n"
-if test "${mydistro}" = "darwin"; then
-    /Applications/Atom.app/Contents/Resources/app/apm/bin/apm install tidalcycles
+nix-shell -p atom --run "apm install tidalcycles"
+
+printf "$COLOR_PURPLE[6]$normal Attempting to configure plugin to use nix...\n"
+if [ -e ~/.atom/config.cson ] ; then
+   if grep -q 'interpreter: "nix"' ~/.atom/config.cson; then
+       printf "Atom already configured.\n"
+   else
+       sed -i.bak  's/^"\*"$/"*"\n  tidalcycles:\n    interpreter: "nix"/' ~/.atom/config.cson
+   fi
 else
-    apm install tidalcycles
+    echo "\"*\"
+  tidalcycles:
+    interpreter: \"nix\"
+" > ~/.atom/config.cson
 fi
 
 #### INSTALL SUPERCOLLIDER
