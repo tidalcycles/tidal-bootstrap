@@ -29,7 +29,7 @@ Running
 You should be able to run the install script by opening a terminal window, pasting in the following and pressing enter:
 
 ```
-curl https://tidalcycles.org/tidal-bootstrap.sh -sSf | sh
+curl https://raw.githubusercontent.com/tidalcycles/tidal-bootstrap/master/tidal-bootstrap.command -sSf | sh
 ```
 
 (It will probably ask for your password at some point. As you type, characters won't be echoed to the screen, so you'll have to look at your keys and do your best!)
