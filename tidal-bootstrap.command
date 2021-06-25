@@ -255,7 +255,7 @@ if test "${mydistro}" = "darwin"; then
 	printf "$COLOR_PURPLE[7]$normal SuperCollider already installed, skipping...\n"
     else
 	printf "$COLOR_PURPLE[7]$normal Installing SuperCollider...\n"
-	curl -Lk https://github.com/supercollider/supercollider/releases/download/Version-3.10.3/SuperCollider-3.10.3-macOS-signed.zip --output /tmp/sc3.zip
+	curl -Lk https://github.com/supercollider/supercollider/releases/download/Version-3.11.2/SuperCollider-3.11.2+BigSur.aed25fa.zip --output /tmp/sc3.zip
 	unzip -q "/tmp/sc3.zip" "SuperCollider/SuperCollider.app/*" -d /tmp/testsc
 	mv /tmp/testsc/SuperCollider/SuperCollider.app /Applications
 	rm /tmp/sc3.zip
@@ -266,7 +266,7 @@ if test "${mydistro}" = "darwin"; then
     else
 	#### INSTALL PLUGINS
 	printf "$COLOR_PURPLE[8]$normal Installing SuperCollider Plugins...\n"
-	curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.10.0/sc3-plugins-3.10.0-macOS-signed.zip --output /tmp/sc3plugins.zip
+	curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.11.1/sc3-plugins-3.11.1-macOS-signed.zip --output /tmp/sc3plugins.zip
 	mkdir -p ~/Library/Application\ Support/SuperCollider/Extensions/
 	unzip -nq /tmp/sc3plugins.zip -d ~/Library/Application\ Support/SuperCollider/Extensions/
 	rm /tmp/sc3plugins.zip
