@@ -302,6 +302,6 @@ echo "Tidal and SuperDirt should now be installed!\n\n"
 echo "Please log out and in again to complete the set up.\n\n"
 
 echo "You can then follow the instructions here to start everything up for the first time:"
-echo "  https://tidalcycles.org/index.php/Start_tidalcycles_and_superdirt_for_the_first_time"
+echo "  https://tidalcycles.org/docs/getting-started/tidal_start"
 echo "Enjoy!"
 exit 0
