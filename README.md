@@ -19,9 +19,9 @@ live coding environment under Mac OS X and Linux (on Debian-derived systems, e.g
 The script checks if the following programs are installed on the system, and installs them if they are missing.
 
 * SuperCollider (and SuperDirt)
-* Atom (and the TidalCycles plugin)
 * ghci (ghcup)
 * The [Tidal library](https://hackage.haskell.org/package/tidal)
+* Note: The Atom text editor is sunset and it is no longer installed. Work is underway to refactor this script to install the Pulsar editor with the tidalcycles plugin.
 
 Running
 -------

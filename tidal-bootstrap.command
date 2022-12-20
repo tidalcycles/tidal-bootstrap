@@ -222,6 +222,10 @@ echo ""
 cabal v2-update
 cabal v2-install tidal --lib
 
+#### Commenting out the Atom install - this needs to be refactored for Pulsar
+####   but a temporary fix is to comment out the Atom section
+####   Added some echo statements at the end to explain to the user. 
+>>'COMMENTATOM'
 #### INSTALL ATOM
 if test "${mydistro}" = "darwin"; then
     if [ -d "/Applications/Atom.app" ]; then
@@ -249,6 +253,8 @@ if test "${mydistro}" = "darwin"; then
 else
     apm install tidalcycles
 fi
+#### end of comment section
+COMMENTATOM
 
 #### INSTALL SUPERCOLLIDER
 if test "${mydistro}" = "darwin"; then
@@ -289,7 +295,6 @@ else
     sudo adduser $USER audio
 fi
 
-
 #### INSTALL SUPERDIRT
 echo "$COLOR_PURPLE[9]$normal Installing the SuperDirt synths and samples (will take some time..)"
 if test "${mydistro}" = "darwin"; then
@@ -302,7 +307,11 @@ echo "Tidal and SuperDirt should now be installed!\n\n"
 
 echo "Please log out and in again to complete the set up.\n\n"
 
-echo "You can then follow the instructions here to start everything up for the first time:"
+echo "The Atom text editor was NOT installed. Atom is now sunset, we are adopting Pulsar."
+echo "To install Pulsar and the tidalcycles package, see:"
+echo "  https://tidalcycles.org/docs/getting-started/editor/Pulsar"
+
+echo "Follow these instructions to start everything up for the first time:"
 echo "  https://tidalcycles.org/docs/getting-started/tidal_start"
 echo "Enjoy!"
 exit 0
