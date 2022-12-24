@@ -1,7 +1,7 @@
 # tidal-bootstrap
 
 This installation script is an "ad-hoc" solution. Effort is made to ensure it works, but it does not have robust error detection and hasn't been fully tested on all current macOS versions. If you have problems, please join us on the
-[#tidal-install](https://chat.toplap.org/channel/tidal-install) chatchannel and we'll try to help. We'd be very happy to hear about
+[#tidal-install](https://chat.toplap.org/channel/tidal-install) chat channel and we'll try to help. We'd be very happy to hear about
 successes too!
 
 ## Summary
@@ -24,10 +24,10 @@ The script checks if the following programs are installed on the system, and ins
     - NOTE: The Pulsar package (plugin) for Tidalcycles is not yet part of this installation. Manual installation is needed. See the [Pulsar page] (https://tidalcycles.org/docs/getting-started/editor/Pulsar).
 
 ### Running
-You should be able to run the install script by opening a terminal window, pasting in the following and pressing enter:
+You can run the install script by opening a terminal window, pasting the following and pressing enter:
 
 ```
 curl https://raw.githubusercontent.com/tidalcycles/tidal-bootstrap/master/tidal-bootstrap.command -sSf | sh
 ```
 
-It will ask for your password - from the "sudo" command.
+It will ask for your password (from the "sudo" command).
