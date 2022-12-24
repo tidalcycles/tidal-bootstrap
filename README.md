@@ -1,35 +1,33 @@
-tidal-bootstrap
-===============
+# tidal-bootstrap
 
-Please note that this is an experimental installation script. Run
-under your own risk. If you have problems, please join us on the
-[#tidal-install](https://chat.toplap.org/channel/tidal-install) chat
-channel and we'll try to help. We'd be very happy to hear about
+This installation script is an "ad-hoc" solution. Effort is made to ensure it works, but it does not have robust error detection and hasn't been fully tested on all current macOS versions. If you have problems, please join us on the
+[#tidal-install](https://chat.toplap.org/channel/tidal-install) chatchannel and we'll try to help. We'd be very happy to hear about
 successes too!
 
-Summary
--------
+## Summary
+### OS support
+- Tested on Mac Intel: Big Sur
+- Install may work on Silicon, but it has yet to be validated and tested.
 
-`tidal-bootstrap` is small shell script which attempts to automate the
-installation process of the [TidalCycles](http://tidalcycles.org/)
-live coding environment under Mac OS X and Linux (on Debian-derived systems, e.g. Ubuntu, Mint).
+#### Description
+`tidal-bootstrap` is shell script which automates the installation process of the [TidalCycles](http://tidalcycles.org/)
+live coding environment under Mac OS X.
 
-`tidal-bootstrap` installs the tools mentioned in TidalCycles [installation](https://tidalcycles.org/index.php/Installation) guide.
+`tidal-bootstrap` installs the components covered in the TidalCycles [MacOS installation](https://tidalcycles.org/docs/getting-started/macos_install) guide.
 
 The script checks if the following programs are installed on the system, and installs them if they are missing.
 
-* SuperCollider (and SuperDirt)
+* SuperCollider, SuperDirt, sc-3 plugins
 * ghci (ghcup)
 * The [Tidal library](https://hackage.haskell.org/package/tidal)
-* Note: The Atom text editor is sunset and it is no longer installed. Work is underway to refactor this script to install the Pulsar editor with the tidalcycles plugin.
+* Pulsar text editor
+    - NOTE: The Pulsar package (plugin) for Tidalcycles is not yet part of this installation. Manual installation is needed. See the [Pulsar page] (https://tidalcycles.org/docs/getting-started/editor/Pulsar).
 
-Running
--------
-
+### Running
 You should be able to run the install script by opening a terminal window, pasting in the following and pressing enter:
 
 ```
 curl https://raw.githubusercontent.com/tidalcycles/tidal-bootstrap/master/tidal-bootstrap.command -sSf | sh
 ```
 
-(It will probably ask for your password at some point. As you type, characters won't be echoed to the screen, so you'll have to look at your keys and do your best!)
+It will ask for your password - from the "sudo" command.

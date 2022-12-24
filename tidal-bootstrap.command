@@ -224,7 +224,7 @@ cabal v2-install tidal --lib
 
 #### Commenting out the Atom install - this needs to be refactored for Pulsar
 ####   but a temporary fix is to comment out the Atom section
-####   Added some echo statements at the end to explain to the user. 
+####   Added some echo statements at the end to explain to the user.
 >>'COMMENTATOM'
 #### INSTALL ATOM
 if test "${mydistro}" = "darwin"; then
@@ -304,13 +304,13 @@ else
 fi
 
 echo "Tidal and SuperDirt should now be installed!\n\n"
-
 echo "Please log out and in again to complete the set up.\n\n"
 
-echo "The Atom text editor was NOT installed. Atom is now sunset, we are adopting Pulsar."
+### if pulsar fails
 echo "To install Pulsar and the tidalcycles package, see:"
 echo "  https://tidalcycles.org/docs/getting-started/editor/Pulsar"
 
+####### Next Steps
 echo "Follow these instructions to start everything up for the first time:"
 echo "  https://tidalcycles.org/docs/getting-started/tidal_start"
 echo "Enjoy!"
