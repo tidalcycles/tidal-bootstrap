@@ -11,6 +11,9 @@
 #   - removed all commands for Linux
 #   - replaced Atom install with Pulsar
 #   - check for Intel vs Silicon vs anything else
+#   - added support for DMG install (Pulsar, SuperCollider)
+#   - changed cabal command to cabal v1-install tidal
+#   - made code format changes per recommendations from shellcheck 
 #   - updated comments back to screen (user)
 #############
 ## NOTES / known issues
