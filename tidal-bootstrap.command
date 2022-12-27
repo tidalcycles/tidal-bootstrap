@@ -1,317 +1,181 @@
 #!/bin/bash
-# Authors: James Campbell, Alex McLean
+# Authors: James Campbell, Alex McLean, HighHarmonics
 # Licence: GPLv3
 # Date: September 2019
-# Last Updated: October 2019
-# Contact: james@jamescampbell.us / alex@slab.org
-# What: tidalcycles installer script for OSX and Linux
+# Last Updated: Dec 2022 (HighHarmonics)
+# Contact: james@jamescampbell.us / alex@slab.org / highharmonics@gmail.com
+# What: tidalcycles installer script for OSX
+#       tested on: Intel Big Sur 11.7.1
+#       not tested on Silicon
+# Change Log: Dec, 2022
+#   - removed all commands for Linux
+#   - replaced Atom install with Pulsar
+#   - check for Intel vs Silicon vs anything else
+#   - updated comments back to screen (user)
+#############
+## NOTES / known issues
+# Install from DMG solution adapted from https://community.jamf.com/t5/jamf-pro/script-for-installing-dmg-pkg-zip-via-curl/m-p/157800
+#    needed to get commands for working with macOS DMG file, which requires hdiutil to attach/detach (mount) the DMG
+# Pulsar download URLs based on DOWNLOAD links instructions:
+#  See https://github.com/pulsar-edit/package-frontend/blob/main/docs/download_links.md
+#
+#  NOTE: zip format currently not available due to a Cirrus problem. When resolved script could be changed to use zip
+#       https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_zip
+#       https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_dmg
+#       https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_zip
+#       https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_dmg
+#  Pulsar macOS downloads are currently unsigned.
+#    As per https://pulsar-edit.dev/   xattr -cr /Applications/Pulsar.app  command needs to be run.
+# tidalcycles plugin install for Pulsar is not automated yet - manual install required. Command below is commented.
 
 #### COLORS
 COLOR_PURPLE='\033[0;35m'
 normal='\033[0m'
 
-get_distro_alias() {
-    distro_name=$1
-    distro_alias=unknown
+### get os values needed for execution
+osName=$(uname -s)
+myArch=$(uname -m) #intel: x86_64  silicon: arm64
 
-    case "${distro_name}" in
-        "Debian"|"Debian GNU/Linux"|"debian")
-            distro_alias=debian
-            ;;
-        "Ubuntu"|"ubuntu")
-            distro_alias=ubuntu
-            ;;
-        "Exherbo"|"exherbo")
-            distro_alias=exherbo
-            ;;
-        "Fedora"|"fedora")
-            distro_alias=fedora
-            ;;
-        "CentOS Linux"|"CentOS"|"centos"|"Red Hat Enterprise Linux"*)
-            distro_alias=centos
-            ;;
-        "Alpine Linux"|"Alpine")
-            distro_alias=alpine
-            ;;
-        "Linux Mint"|"LinuxMint")
-            distro_alias=mint
-            ;;
-        "Amazon Linux AMI")
-            distro_alias=amazonlinux
-            ;;
-        "AIX")
-            distro_alias=aix
-            ;;
-        "FreeBSD")
-            distro_alias=freebsd
-            ;;
-        "Darwin")
-            distro_alias=darwin
-            ;;
-    esac
-
-    printf "%s" "${distro_alias}"
-
-    unset distro_name distro_alias
-}
-
-get_distro_name() {
-    if [ -f /etc/os-release ]; then
-        # freedesktop.org and systemd
-        # shellcheck disable=SC1091
-        . /etc/os-release
-        printf "%s" "$NAME"
-    elif command_exists lsb_release ; then
-        # linuxbase.org
-        printf "%s" "$(lsb_release -si)"
-    elif [ -f /etc/lsb-release ]; then
-        # For some versions of Debian/Ubuntu without lsb_release command
-        # shellcheck disable=SC1091
-        . /etc/lsb-release
-        printf "%s" "$DISTRIB_ID"
-    elif [ -f /etc/redhat-release ]; then
-        case "$(cat /etc/redhat-release)" in
-        # Older CentOS releases didn't have a /etc/centos-release file
-        "CentOS release "*)
-            printf "CentOS"
-            ;;
-        "CentOS Linux release "*)
-            printf "CentOS Linux"
-            ;;
-        "Fedora release "*)
-            printf "Fedora"
-            ;;
-        # Fallback to uname
-        *)
-            printf "%s" "$(uname -s)"
-            ;;
-        esac
-    elif [ -f /etc/debian_version ]; then
-        # Older Debian/Ubuntu/etc.
-        printf "Debian"
-    else
-        # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
-        printf "%s" "$(uname -s)"
-    fi
-}
-
-get_distro_ver() {
-    if [ -f /etc/os-release ]; then
-        # freedesktop.org and systemd
-        # shellcheck disable=SC1091
-        . /etc/os-release
-        printf "%s" "$VERSION_ID"
-    elif command_exists lsb_release ; then
-        # linuxbase.org
-        printf "%s" "$(lsb_release -sr)"
-    elif [ -f /etc/lsb-release ]; then
-        # For some versions of Debian/Ubuntu without lsb_release command
-        # shellcheck disable=SC1091
-        . /etc/lsb-release
-        printf "%s" "$DISTRIB_RELEASE"
-    elif [ -f /etc/redhat-release ]; then
-        case "$(cat /etc/redhat-release)" in
-        # NB: Older CentOS releases didn't have a /etc/centos-release file
-        "CentOS release "*|"Fedora release "*)
-            printf "%s" "$(awk 'NR==1 { split($3, a, "."); print a[1] }' /etc/redhat-release)"
-            ;;
-        "CentOS Linux release "*)
-            printf "%s" "$(awk 'NR==1 { split($4, a, "."); print a[1] }' /etc/redhat-release)"
-            ;;
-        # Fallback to uname
-        *)
-            printf "%s" "$(uname -r)"
-            ;;
-        esac
-    elif [ -f /etc/debian_version ]; then
-        # Older Debian/Ubuntu/etc.
-        printf "%s" "$(cat /etc/debian_version)"
-    else
-        case "$(uname -s)" in
-        AIX)
-            printf "%s" "$(uname -v)"
-            ;;
-        FreeBSD)
-            # we only care about the major numeric version part left of
-            # the '.' in "11.2-RELEASE".
-            printf "%s" "$(uname -r | cut -d . -f 1)"
-            ;;
-        *)
-            # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
-            printf "%s" "$(uname -r)"
-        esac
-    fi
-}
-
-get_arch() {
-    myarch=$(uname -m)
-
-    case "${myarch}" in
-    x86_64|amd64)
-        printf "x86_64"  # or AMD64 or Intel64 or whatever
-        ;;
-    i*86)
-        printf "i386"  # or IA32 or Intel32 or whatever
-        ;;
-    *)
-        case "$(uname -s)" in
-        AIX)
-            case "$(uname -p)" in
-            powerpc)
-                printf "powerpc"
-                ;;
-            *)
-                die "Cannot figure out architecture on AIX (was: ${myarch})"
-                ;;
-            esac
-            ;;
-        *)
-            die "Cannot figure out architecture (was: ${myarch})"
-            ;;
-        esac
-    esac
-
-    unset myarch
-}
-
-
-echo "Detected system information:"
-echo "  Architecture:   $(get_arch)"
-echo "  Distribution:   $(get_distro_name)"
-echo "  Distro alias:   $(get_distro_alias "$(get_distro_name)")"
-echo "  Distro version: $(get_distro_ver)"
-
-mydistro=$(get_distro_alias "$(get_distro_name)")
-
-#### CHECK FOR GIT
-if test "${mydistro}" = "darwin"; then
-    if command -v git 2>/dev/null; then
-	printf "$COLOR_PURPLE[1]$normal 'git' command already installed.\n"
-    else
-	printf "$COLOR_PURPLE[1]$normal 'git' required, installing commandline tools..."
-	printf "** Please click 'install' when a popup appears, and wait until it finishes installing. **\n"
-	/usr/bin/xcode-select --install
-        printf "\nWhen that's done, click on this window and press enter to continue."
-        read -r answer </dev/tty
-    fi
+## test for macOS - exit script if not Darwin
+if test "${osName}" = "Darwin"; then
+    printf "Installing Tidalcycles stack for:\n  os: ${osName}\n  arch: ${myArch}\n\n"
 else
-    # Don't bother checking to see if they're there or not. Apt will
-    # do that!
-    printf "$COLOR_PURPLE[1]$normal Installing build tools (via apt)...\n"
-    sudo apt-get install -qqy git build-essential libgmp-dev
+    printf "This install script is for use on macOS (Intel or Silicon).\n"
+    printf "For Linux or Windows install, see the Install Tidal section in the User Documentation.\n"
+    exit 0
+fi
+###
+## determine Intel vs Silicon - set Pulsar download url with query string setting
+if test "${myArch}" = "x86_64"; then
+    pulsarURL="https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_dmg"
+elif test "${myArch}" = "arm64"; then
+    printf "installing for macOS Silicon\n\n"
+    printf "WARNING: Silicon install is untested. Certain components may fail.\n\n"
+    pulsarURL="https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_dmg"
+else
+    printf "I don't recognize your system as macOS Intel or Silicon. Aborting script.\n\n"
+    exit 0
+fi
+
+### GIT - check for git and install via xcode-select if needed
+printf "starting install - checking for components\n"
+
+if command -v git 2>/dev/null; then
+    printf "${COLOR_PURPLE}[1]$normal 'git' already installed.\n"
+else
+    printf "${COLOR_PURPLE}[1]$normal 'git' is required, installing macOS commandline tools...\n"
+    printf "** Please click 'install' when a popup appears, and wait until it finishes installing. **\n"
+    /usr/bin/xcode-select --install
+    printf "\nWhen that's done, click on this window and press enter to continue."
+    read -r answer </dev/tty
 fi
 
 #### CHECK FOR HASKELL
 if [ -e ~/.ghcup/bin/cabal ]; then
-	printf "$COLOR_PURPLE[2]$normal Haskell found, skipping install of that...\n"
+	printf "${COLOR_PURPLE}[2]$normal Haskell found, skipping ...\n"
 else
-	printf "$COLOR_PURPLE[2]$normal Installing Haskell (via 'ghcup')...\n"
-        curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
-        if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
-            printf "$COLOR_PURPLE[2.1]$normal Adding ghcup initialisation to ~/.bashrc and zshrc...\n"
-            echo 'source $HOME/.ghcup/env' >> "$HOME/.bashrc"
+	printf "${COLOR_PURPLE}[2]$normal Installing Haskell (via 'ghcup')...\n"
+    curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
+    if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
+        printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and zshrc...\n"
+        echo 'source $HOME/.ghcup/env' >> "$HOME/.bashrc"
 	    echo 'source $HOME/.ghcup/env' >> "$HOME/.zshrc"
-        fi
+    fi
 fi
 
 #### INSTALL TIDALCYCLES
-printf "$COLOR_PURPLE[3]$normal Congratulations, you have all the pre-reqs...\n"
-echo "Installing tidalcycles haskell library (via cabal)..."
-echo ""
+printf "${COLOR_PURPLE}[3]$normal You should now have all the required installs for tidal...\n\n"
+printf "Installing tidalcycles haskell library (via cabal)...\n"
 . "$HOME/.ghcup/env"
-cabal v2-update
-cabal v2-install tidal --lib
+cabal update
+cabal v1-install tidal
 
-#### Commenting out the Atom install - this needs to be refactored for Pulsar
-####   but a temporary fix is to comment out the Atom section
-####   Added some echo statements at the end to explain to the user.
->>'COMMENTATOM'
-#### INSTALL ATOM
-if test "${mydistro}" = "darwin"; then
-    if [ -d "/Applications/Atom.app" ]; then
-	printf "$COLOR_PURPLE[4]$normal Atom already installed, skipping...\n"
-    else
-	printf "$COLOR_PURPLE[4]$normal Installing Atom...\n"
-	curl -Lk https://atom.io/download/mac --output /tmp/atom.zip
-	unzip -q "/tmp/atom.zip" -d /Applications
-	rm /tmp/atom.zip
-    fi
+#### INSTALL Pulsar
+if [ -d "/Applications/Pulsar.app" ]; then
+	printf "${COLOR_PURPLE}[4]$normal Pulsar already installed, skipping...\n"
 else
-    if command -v atom 2>/dev/null; then
-	printf "$COLOR_PURPLE[4]$normal Atom already installed.\n"
-    else
-	printf "$COLOR_PURPLE[4]$normal Downloading and installing the Atom editor...\n"
-	curl -Lk https://atom.io/download/deb --output /tmp/atom.deb
-	sudo apt -qqy install /tmp/atom.deb
-	rm /tmp/atom.deb
-    fi
+	printf "${COLOR_PURPLE}[4]$normal Installing Pulsar...\n"
+### zip version (when available)
+#	curl -Lk 'https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_zip' --output /tmp/pulsar.zip
+#	unzip -q "/tmp/pulsar.zip" -d /Applications
+#	rm /tmp/pulsar.zip
+#   pulsarFile="/Applications/Pulsar.app/"
+#############
+# dmg version - scripting commands source: https://community.jamf.com/t5/jamf-pro/script-for-installing-dmg-pkg-zip-via-curl/m-p/157800
+# Creates a tmp directory to mount the .dmg using the hdiutil commands
+    pulsarFile="/Applications/Pulsar.app/"
+    tmpDir=$(/usr/bin/mktemp -d /tmp/PulsarDMG)
+    printf "downloading Pulsar to /tmp \n"
+    curl -Lk "${pulsarURL}" --output "${tmpDir}/Pulsar.dmg"
+    hdiutil attach "${tmpDir}/Pulsar.dmg" -nobrowse -quiet -mountpoint "${tmpDir}"
+    ditto "${tmpDir}/Pulsar.app" "${pulsarFile}"
+    sleep 1
+    # Detach the dmg and remove the temporary mountpoint
+    hdiutil detach -quiet "${tmpDir}"
+    printf "\nremoving temp dir \n"
+    /bin/rm -rf "${tmpDir}"
+# end dmg version. xattr command needed until pulsar provides a signed download
+    xattr -cr "${pulsarFile}"
 fi
+#### INSTALL Plusar plugin - comment out until its ready
+#printf "${COLOR_PURPLE}[5]$normal Installing TidalCycles plugin...\n"
+#/Applications/Pulsar.app/Contents/Resources/app/ppm/bin/apm install tidalcycles
 
-printf "$COLOR_PURPLE[6]$normal Installing atom TidalCycles plugin...\n"
-if test "${mydistro}" = "darwin"; then
-    /Applications/Atom.app/Contents/Resources/app/apm/bin/apm install tidalcycles
-else
-    apm install tidalcycles
-fi
-#### end of comment section
-COMMENTATOM
+printf "${COLOR_PURPLE}[5]$normal NOTE: Pulsar Tidalcycles plugin install can't be automated yet.\n"
+printf "You will need to install manually.\n"
+printf "See the Pulsar page in the Documentation:\n"
+printf "   Pulsar > Manual install of Tidal package\n"
+printf "   https://tidalcycles.org/docs/getting-started/editor/Pulsar\n"
 
 #### INSTALL SUPERCOLLIDER
-if test "${mydistro}" = "darwin"; then
-    if [ -d "/Applications/SuperCollider.app" ]; then
-	printf "$COLOR_PURPLE[7]$normal SuperCollider already installed, skipping...\n"
-    else
-	printf "$COLOR_PURPLE[7]$normal Installing SuperCollider...\n"
-	curl -Lk https://github.com/supercollider/supercollider/releases/download/Version-3.11.2/SuperCollider-3.11.2+BigSur.aed25fa.zip --output /tmp/sc3.zip
-	unzip -q "/tmp/sc3.zip" "SuperCollider/SuperCollider.app/*" -d /tmp/testsc
-	mv /tmp/testsc/SuperCollider/SuperCollider.app /Applications
-	rm /tmp/sc3.zip
-    fi
+if [ -d "/Applications/SuperCollider.app" ]; then
+    printf "${COLOR_PURPLE}[6]$normal SuperCollider already installed, skipping...\n"
+else
+	printf "${COLOR_PURPLE}[6]$normal Installing SuperCollider...\n"
+## use supercollider v 3.12.2, which now onlyl supports DMG format
+    scFile="/Applications/SuperCollider.app/"
+    tmpDirSC=$(/usr/bin/mktemp -d /tmp/scDMG)
+    scURL="https://github.com/supercollider/supercollider/releases/download/Version-3.12.2/SuperCollider-3.12.2-macOS.dmg"
 
-    if [ -e "~/Library/Application\ Support/SuperCollider/Extensions/StkInst.scx" ]; then
-	printf "$COLOR_PURPLE[8]$normal sc3-plugins already installed, skipping...\n"
-    else
-	#### INSTALL PLUGINS
-	printf "$COLOR_PURPLE[8]$normal Installing SuperCollider Plugins...\n"
+    curl -Lk "${scURL}" --output "${tmpDirSC}/sc3-12.dmg"
+    hdiutil attach "${tmpDirSC}/sc3-12.dmg" -nobrowse -quiet -mountpoint "${tmpDirSC}"
+    ditto "${tmpDirSC}/SuperCollider.app" "${scFile}"
+# could also copy sc examples folder to location on local system - desktop??
+# or just print out examples location in GH https://github.com/supercollider/supercollider/tree/develop/examples
+    sleep 1
+# Detach the dmg and remove the temporary mountpoint
+    hdiutil detach -quiet "${tmpDirSC}"
+    /bin/rm -rf "${tmpDirSC}"
+##     xattr -cr "${scFile}"  # not sure if this is needed
+##
+#### ZIP file version - only available for 3.11.2 and earlier
+#	curl -Lk https://github.com/supercollider/supercollider/releases/download/Version-3.11.2/SuperCollider-3.11.2+BigSur.aed25fa.zip --output /tmp/sc3.zip
+#	unzip -q "/tmp/sc3.zip" "SuperCollider/SuperCollider.app/*" -d /tmp/testsc
+#	mv /tmp/testsc/SuperCollider/SuperCollider.app /Applications
+#	rm /tmp/sc3.zip
+fi
+
+#### INSTALL sc3-plugins (Not sure why StkInst.scx is here. I don't have it.)
+if [[ -f "$HOME/Library/Application Support/SuperCollider/Extensions/StkInst.scx" ||
+      -d "$HOME/Library/Application Support/SuperCollider/Extensions/SC3plugins" ]]; then
+	printf "${COLOR_PURPLE}[7]$normal sc3-plugins already installed, skipping...\n"
+else
+	printf "${COLOR_PURPLE}[7]$normal Installing SuperCollider sc-3 Plugins...\n"
 	curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.11.1/sc3-plugins-3.11.1-macOS-signed.zip --output /tmp/sc3plugins.zip
 	mkdir -p ~/Library/Application\ Support/SuperCollider/Extensions/
 	unzip -nq /tmp/sc3plugins.zip -d ~/Library/Application\ Support/SuperCollider/Extensions/
 	rm /tmp/sc3plugins.zip
-    fi
-else
-    if command -v scide 2>/dev/null; then
-	printf "$COLOR_PURPLE[7]$normal SuperCollider already installed, skipping...\n"
-    else
-	printf "$COLOR_PURPLE[7]$normal Downloading, compiling and installing SuperCollider and sc3plugins...\n"
-	mkdir ~/tidal-tmp
-	cd ~/tidal-tmp
-	git clone https://github.com/lvm/build-supercollider
-	cd build-supercollider
-	./build-supercollider.sh
-	./build-sc3-plugins.sh
-    fi
-
-    printf "$COLOR_PURPLE[7.1]$normal Adding user to the 'audio' group.\n"
-    sudo adduser $USER audio
 fi
 
 #### INSTALL SUPERDIRT
-echo "$COLOR_PURPLE[9]$normal Installing the SuperDirt synths and samples (will take some time..)"
-if test "${mydistro}" = "darwin"; then
-    echo 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
-else
-    echo 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | sclang
-fi
+printf "${COLOR_PURPLE}[8]$normal Installing the SuperDirt synths and samples (will take some time..)\n"
+printf 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
 
-echo "Tidal and SuperDirt should now be installed!\n\n"
-echo "Please log out and in again to complete the set up.\n\n"
-
-### if pulsar fails
-echo "To install Pulsar and the tidalcycles package, see:"
-echo "  https://tidalcycles.org/docs/getting-started/editor/Pulsar"
+printf "Tidal, SuperCollider, SuperDirt + sc-3, and Pulsar editor should now be installed!\n"
+printf "Please log out and in again to complete the set up.\n"
 
 ####### Next Steps
-echo "Follow these instructions to start everything up for the first time:"
-echo "  https://tidalcycles.org/docs/getting-started/tidal_start"
-echo "Enjoy!"
+printf "Follow these instructions to start everything up for the first time:\n"
+printf "   https://tidalcycles.org/docs/getting-started/tidal_start\n"
+printf "${COLOR_PURPLE}[9: Enjoy!]$normal\n\n"
 exit 0
