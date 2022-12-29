@@ -13,7 +13,7 @@
 #   - check for Intel vs Silicon vs anything else
 #   - added support for DMG install (Pulsar, SuperCollider)
 #   - changed cabal command to cabal v1-install tidal
-#   - made code format changes per recommendations from shellcheck 
+#   - made code format changes per recommendations from shellcheck
 #   - updated comments back to screen (user)
 #############
 ## NOTES / known issues
@@ -80,9 +80,9 @@ else
 	printf "${COLOR_PURPLE}[2]$normal Installing Haskell (via 'ghcup')...\n"
     curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
     if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
-        printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and zshrc...\n"
+        printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and ~/.zshrc...\n"
         echo 'source $HOME/.ghcup/env' >> "$HOME/.bashrc"
-	    echo 'source $HOME/.ghcup/env' >> "$HOME/.zshrc"
+        echo 'source $HOME/.ghcup/env' >> "$HOME/.zshrc"
     fi
 fi
 
@@ -90,7 +90,7 @@ fi
 printf "${COLOR_PURPLE}[3]$normal You should now have all the required installs for tidal...\n\n"
 printf "Installing tidalcycles haskell library (via cabal)...\n"
 . "$HOME/.ghcup/env"
-cabal update
+cabal v1-update
 cabal v1-install tidal
 
 #### INSTALL Pulsar
