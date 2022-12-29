@@ -26,7 +26,6 @@
 #  See https://github.com/pulsar-edit/package-frontend/blob/main/docs/download_links.md
 #  Pulsar macOS downloads are currently unsigned.
 #    As per https://pulsar-edit.dev/   xattr -cr /Applications/Pulsar.app  command needs to be run.
-# tidalcycles plugin install for Pulsar is not automated yet - manual install required. Command below is commented.
 
 #### COLORS
 COLOR_PURPLE='\033[0;35m'
