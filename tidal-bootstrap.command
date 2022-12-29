@@ -11,8 +11,11 @@
 #   - removed all commands for Linux
 #   - replaced Atom install with Pulsar
 #   - check for Intel vs Silicon vs anything else
-#   - added support for DMG install (Pulsar, SuperCollider)
-#   - changed cabal command to cabal v1-install tidal
+#   - added support for DMG install (Pulsar, SuperCollider), removed zip format
+#      if zip format is wanted again, revert via using a previous version
+#   - changed cabal command to use v1-install tidal (note: continue to use cabal update)
+#   - resolved bug when no shell profile is present (.bashrc or .zshrc) .ghcup/env initialization doesn't load properly
+#      done by "touching" both files at top of script
 #   - made code format changes per recommendations from shellcheck
 #   - updated comments back to screen (user)
 #############
@@ -21,12 +24,6 @@
 #    needed to get commands for working with macOS DMG file, which requires hdiutil to attach/detach (mount) the DMG
 # Pulsar download URLs based on DOWNLOAD links instructions:
 #  See https://github.com/pulsar-edit/package-frontend/blob/main/docs/download_links.md
-#
-#  NOTE: zip format currently not available due to a Cirrus problem. When resolved script could be changed to use zip
-#       https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_zip
-#       https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_dmg
-#       https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_zip
-#       https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_dmg
 #  Pulsar macOS downloads are currently unsigned.
 #    As per https://pulsar-edit.dev/   xattr -cr /Applications/Pulsar.app  command needs to be run.
 # tidalcycles plugin install for Pulsar is not automated yet - manual install required. Command below is commented.
@@ -62,6 +59,9 @@ fi
 
 ### GIT - check for git and install via xcode-select if needed
 printf "starting install - checking for components\n"
+printf "using touch command to ensure shell profiles are present\n"
+## Haskell install assumes .bashrc  with macOS no .bashrc or .zshrc is created
+touch "$HOME/.bashrc" "$HOME/.zshrc"
 
 if command -v git 2>/dev/null; then
     printf "${COLOR_PURPLE}[1]$normal 'git' already installed.\n"
@@ -79,6 +79,7 @@ if [ -e ~/.ghcup/bin/cabal ]; then
 else
 	printf "${COLOR_PURPLE}[2]$normal Installing Haskell (via 'ghcup')...\n"
     curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
+    ## Haskell install will write ghcup text to profile - if this grep test fails, it means the haskell install failed
     if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
         printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and ~/.zshrc...\n"
         echo 'source $HOME/.ghcup/env' >> "$HOME/.bashrc"
@@ -90,7 +91,7 @@ fi
 printf "${COLOR_PURPLE}[3]$normal You should now have all the required installs for tidal...\n\n"
 printf "Installing tidalcycles haskell library (via cabal)...\n"
 . "$HOME/.ghcup/env"
-cabal v1-update
+cabal update
 cabal v1-install tidal
 
 #### INSTALL Pulsar
@@ -98,13 +99,8 @@ if [ -d "/Applications/Pulsar.app" ]; then
 	printf "${COLOR_PURPLE}[4]$normal Pulsar already installed, skipping...\n"
 else
 	printf "${COLOR_PURPLE}[4]$normal Installing Pulsar...\n"
-### zip version (when available)
-#	curl -Lk 'https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_zip' --output /tmp/pulsar.zip
-#	unzip -q "/tmp/pulsar.zip" -d /Applications
-#	rm /tmp/pulsar.zip
-#   pulsarFile="/Applications/Pulsar.app/"
-#############
-# dmg version - scripting commands source: https://community.jamf.com/t5/jamf-pro/script-for-installing-dmg-pkg-zip-via-curl/m-p/157800
+## note: zip version not available when script was completed
+##     if it becomes available, this section could be reverted use zip
 # Creates a tmp directory to mount the .dmg using the hdiutil commands
     pulsarFile="/Applications/Pulsar.app/"
     tmpDir=$(/usr/bin/mktemp -d /tmp/PulsarDMG)
@@ -119,23 +115,21 @@ else
     /bin/rm -rf "${tmpDir}"
 # end dmg version. xattr command needed until pulsar provides a signed download
     xattr -cr "${pulsarFile}"
-fi
-#### INSTALL Plusar plugin - comment out until its ready
-#printf "${COLOR_PURPLE}[5]$normal Installing TidalCycles plugin...\n"
-#/Applications/Pulsar.app/Contents/Resources/app/ppm/bin/apm install tidalcycles
 
-printf "${COLOR_PURPLE}[5]$normal NOTE: Pulsar Tidalcycles plugin install can't be automated yet.\n"
-printf "You will need to install manually.\n"
-printf "See the Pulsar page in the Documentation:\n"
-printf "   Pulsar > Manual install of Tidal package\n"
-printf "   https://tidalcycles.org/docs/getting-started/editor/Pulsar\n"
+    #### INSTALL Plusar plugin - this should work, but it relies on the Pulsar pkg mgr
+    printf "${COLOR_PURPLE}[5]$normal Installing TidalCycles plugin...\n"
+    printf "If this fails, you will need to install manually. See the Pulsar page in the Documentation:\n"
+    printf "   Pulsar > Manual install of Tidal package\n"
+    printf "   https://tidalcycles.org/docs/getting-started/editor/Pulsar\n"
+    /Applications/Pulsar.app/Contents/Resources/app/ppm/bin/apm install tidalcycles
+fi
 
 #### INSTALL SUPERCOLLIDER
 if [ -d "/Applications/SuperCollider.app" ]; then
     printf "${COLOR_PURPLE}[6]$normal SuperCollider already installed, skipping...\n"
 else
 	printf "${COLOR_PURPLE}[6]$normal Installing SuperCollider...\n"
-## use supercollider v 3.12.2, which now onlyl supports DMG format
+## use supercollider v 3.12.2, which now only supports DMG format
     scFile="/Applications/SuperCollider.app/"
     tmpDirSC=$(/usr/bin/mktemp -d /tmp/scDMG)
     scURL="https://github.com/supercollider/supercollider/releases/download/Version-3.12.2/SuperCollider-3.12.2-macOS.dmg"
@@ -143,22 +137,13 @@ else
     curl -Lk "${scURL}" --output "${tmpDirSC}/sc3-12.dmg"
     hdiutil attach "${tmpDirSC}/sc3-12.dmg" -nobrowse -quiet -mountpoint "${tmpDirSC}"
     ditto "${tmpDirSC}/SuperCollider.app" "${scFile}"
-# could also copy sc examples folder to location on local system - desktop??
-# or just print out examples location in GH https://github.com/supercollider/supercollider/tree/develop/examples
     sleep 1
 # Detach the dmg and remove the temporary mountpoint
     hdiutil detach -quiet "${tmpDirSC}"
     /bin/rm -rf "${tmpDirSC}"
-##     xattr -cr "${scFile}"  # not sure if this is needed
-##
-#### ZIP file version - only available for 3.11.2 and earlier
-#	curl -Lk https://github.com/supercollider/supercollider/releases/download/Version-3.11.2/SuperCollider-3.11.2+BigSur.aed25fa.zip --output /tmp/sc3.zip
-#	unzip -q "/tmp/sc3.zip" "SuperCollider/SuperCollider.app/*" -d /tmp/testsc
-#	mv /tmp/testsc/SuperCollider/SuperCollider.app /Applications
-#	rm /tmp/sc3.zip
 fi
 
-#### INSTALL sc3-plugins (Not sure why StkInst.scx is here. I don't have it.)
+#### INSTALL sc3-plugins (Not sure why StkInst.scx is here. Leaving it in.)
 if [[ -f "$HOME/Library/Application Support/SuperCollider/Extensions/StkInst.scx" ||
       -d "$HOME/Library/Application Support/SuperCollider/Extensions/SC3plugins" ]]; then
 	printf "${COLOR_PURPLE}[7]$normal sc3-plugins already installed, skipping...\n"
