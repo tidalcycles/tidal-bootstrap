@@ -21,9 +21,9 @@ The script checks if the following programs are installed on the system, and ins
 - [cabal](https://www.haskell.org/cabal/): package system for Haskell and Tidalcycles
 - The Tidal Pattern engine (Tidal Cycles itself), with the important BootTidal.hs file
 - [Pulsar](https://pulsar-edit.dev/): Text editor
-    - [tidalcycles plugin](https://github.com/tidalcycles/atom-tidalcycles)) for Pulsar
+    - [tidalcycles plugin](https://github.com/tidalcycles/atom-tidalcycles) for Pulsar
 - [SuperCollider](https://supercollider.github.io/) for backend audio generation, and:
-    - [SuperDirt](https://github.com/musikinformatik/SuperDirt)): sample library used by tidal
+    - [SuperDirt](https://github.com/musikinformatik/SuperDirt): sample library used by tidal
     - [sc-3 plugins](https://github.com/supercollider/sc3-plugins): unit generator plugins
 
 ### Running tidal-bootstrap

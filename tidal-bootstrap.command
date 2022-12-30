@@ -10,12 +10,14 @@
 # Change Log: Dec, 2022
 #   - removed all commands for Linux
 #   - replaced Atom install with Pulsar
+#       - made Pulsar plugin install a separate section
 #   - check for Intel vs Silicon vs anything else
 #   - added support for DMG install (Pulsar, SuperCollider), removed zip format
 #      if zip format is wanted again, revert via using a previous version
 #   - changed cabal command to use v1-install tidal (note: continue to use cabal update)
 #   - resolved bug when no shell profile is present (.bashrc or .zshrc) .ghcup/env initialization doesn't load properly
-#      done by "touching" both files at top of script
+#      done by "touching" both files at top of script and changing test for Haskell install
+#   - added test for SuperDirt install
 #   - made code format changes per recommendations from shellcheck
 #   - updated comments back to screen (user)
 #############
@@ -26,6 +28,7 @@
 #  See https://github.com/pulsar-edit/package-frontend/blob/main/docs/download_links.md
 #  Pulsar macOS downloads are currently unsigned.
 #    As per https://pulsar-edit.dev/   xattr -cr /Applications/Pulsar.app  command needs to be run.
+#  Pulsar plugin install is not reliable - it still may require manual install. 
 
 #### COLORS
 COLOR_PURPLE='\033[0;35m'
@@ -166,7 +169,7 @@ else
 	rm /tmp/sc3plugins.zip
 fi
 
-#### INSTALL SUPERDIRT 
+#### INSTALL SUPERDIRT
 if [ -d "${HOME}/Library/Application Support/SuperCollider/downloaded-quarks/SuperDirt" ]; then
     printf "${COLOR_PURPLE}[8]$normal SuperDirt already installed, skipping..."
 else
