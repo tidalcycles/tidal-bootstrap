@@ -78,11 +78,13 @@ if [ -e ~/.ghcup/bin/cabal ]; then
 else
 	printf "${COLOR_PURPLE}[2]$normal Installing Haskell (via 'ghcup')...\n"
     curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
-    ## Haskell install will write ghcup text to profile - if this grep test fails, it means the haskell install failed
-    if [ $(grep -c ghcup ~/.bashrc) -ne 0 ]; then
+    ## test to see if cabal exists - then add the env var to shell profiles
+    if [ -e "${HOME}/.ghcup/bin/cabal" ]; then
         printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and ~/.zshrc...\n"
-        echo 'source $HOME/.ghcup/env' >> "$HOME/.bashrc"
-        echo 'source $HOME/.ghcup/env' >> "$HOME/.zshrc"
+        echo 'source ${HOME}/.ghcup/env' >> "${HOME}/.bashrc"
+        echo 'source ${HOME}/.ghcup/env' >> "${HOME}/.zshrc"
+    else
+        printf "Error: Haskell pkg mgr cabal not found in ${HOME}/.ghcup/bin. "
     fi
 fi
 
@@ -114,13 +116,23 @@ else
     /bin/rm -rf "${tmpDir}"
 # end dmg version. xattr command needed until pulsar provides a signed download
     xattr -cr "${pulsarFile}"
+fi
 
-    #### INSTALL Plusar plugin - this should work, but it relies on the Pulsar pkg mgr
+#### INSTALL Plusar plugin - this should work, but it relies on the Pulsar pkg mgr
+if [ -d "${HOME}/.pulsar/packages/tidalcycles/node_modules/osc-min" ]; then
+    printf "${COLOR_PURPLE}[5]$normal TidalCycles plugin already installed, skipping ...\n"
+else
     printf "${COLOR_PURPLE}[5]$normal Installing TidalCycles plugin...\n"
-    printf "If this fails, you will need to install manually. See the Pulsar page in the Documentation:\n"
-    printf "   Pulsar > Manual install of Tidal package\n"
-    printf "   https://tidalcycles.org/docs/getting-started/editor/Pulsar\n"
     /Applications/Pulsar.app/Contents/Resources/app/ppm/bin/apm install tidalcycles
+    # test for successful pkg mgr install
+    if [ -d "${HOME}/.pulsar/packages/tidalcycles/node_modules/osc-min" ]; then
+        printf "Successful install of tidalcyles plugin in Pulsar\n"
+    else
+        printf "tidalcycles plugin install failed, you may need to install manually.\n"
+        printf "See the Pulsar page in the Documentation:\n"
+        printf "   Pulsar > Manual install of Tidal package\n"
+        printf "   https://tidalcycles.org/docs/getting-started/editor/Pulsar\n"
+    fi
 fi
 
 #### INSTALL SUPERCOLLIDER
@@ -154,9 +166,13 @@ else
 	rm /tmp/sc3plugins.zip
 fi
 
-#### INSTALL SUPERDIRT
-printf "${COLOR_PURPLE}[8]$normal Installing the SuperDirt synths and samples (will take some time..)\n"
-printf 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
+#### INSTALL SUPERDIRT 
+if [ -d "${HOME}/Library/Application Support/SuperCollider/downloaded-quarks/SuperDirt" ]; then
+    printf "${COLOR_PURPLE}[8]$normal SuperDirt already installed, skipping..."
+else
+    printf "${COLOR_PURPLE}[8]$normal Installing the SuperDirt synths and samples (will take some time..)\n"
+    printf 'include("SuperDirt");"SuperDirt installation complete!".postln;0.exit;' | /Applications/SuperCollider.app/Contents/MacOS/sclang
+fi
 
 printf "Tidal, SuperCollider, SuperDirt + sc-3, and Pulsar editor should now be installed!\n"
 printf "Please log out and in again to complete the set up.\n"
