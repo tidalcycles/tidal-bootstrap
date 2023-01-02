@@ -49,11 +49,11 @@ fi
 ###
 ## determine Intel vs Silicon - set Pulsar download url with query string setting
 if test "${myArch}" = "x86_64"; then
-    pulsarURL="https://web.pulsar-edit.dev/download?os=intel_mac&type=mac_dmg"
+    pulsarURL="https://download.pulsar-edit.dev/?os=intel_mac&type=mac_dmg"
 elif test "${myArch}" = "arm64"; then
     printf "installing for macOS Silicon\n\n"
-    printf "WARNING: Silicon install is untested. Certain components may fail.\n\n"
-    pulsarURL="https://web.pulsar-edit.dev/download?os=silicon_mac&type=mac_dmg"
+    printf "WARNING: Silicon install hasn't had much testing. Certain components may fail.\n\n"
+    pulsarURL="https://download.pulsar-edit.dev/?os=silicon_mac&type=mac_dmg"
 else
     printf "I don't recognize your system as macOS Intel or Silicon. Aborting script.\n\n"
     exit 0
