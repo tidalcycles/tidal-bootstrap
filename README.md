@@ -1,12 +1,11 @@
 # tidal-bootstrap
 
-This installation script is an "ad-hoc" solution. Effort is made to ensure it works, but it does not have robust error detection and hasn't been fully tested on all current macOS versions. If you have problems, please join us on the
-[#tidal-install](https://chat.toplap.org/channel/tidal-install) chat channel and we'll try to help. We'd be very happy to hear about successes too!
+This installation script is an "ad-hoc" solution. Effort is made to ensure it works, but it does not have robust error detection and hasn't been fully tested on all current macOS versions. If you have problems, please join us on the Tidal Cycles [Discord installation-help channel](https://discord.com/channels/779427371270275082/779487905822801930) or [Club Tidal forum](https://club.tidalcycles.org/c/installation/5) and we'll try to help. We'd be very happy to hear about successes too!
 
 ## Summary
 ### OS support
 - Tested on Mac Intel: Big Sur, Monterey
-- Install may work on Silicon, but it has yet to be validated and tested.
+- Install on M1 (Silicon) OSX Ventura has been validated
 - Support for Linux has been removed, the script will exit.
 
 #### Description
