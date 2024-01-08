@@ -20,6 +20,11 @@
 #   - added test for SuperDirt install
 #   - made code format changes per recommendations from shellcheck
 #   - updated comments back to screen (user)
+#
+# Change Log: Jan, 2024
+#   - updated SC and SC3 plugins versions for compatibility with Apple Silicon (test on OS X 14.2.1)
+#   - unzip SC3 plugins to tmp directory then move SC3Plugins subdirectory to the SC Extensions directory
+#     to conform with the file structure in the latest SC3 plugins release ZIP.
 #############
 ## NOTES / known issues
 # Install from DMG solution adapted from https://community.jamf.com/t5/jamf-pro/script-for-installing-dmg-pkg-zip-via-curl/m-p/157800
@@ -143,13 +148,12 @@ if [ -d "/Applications/SuperCollider.app" ]; then
     printf "${COLOR_PURPLE}[6]$normal SuperCollider already installed, skipping...\n"
 else
 	printf "${COLOR_PURPLE}[6]$normal Installing SuperCollider...\n"
-## use supercollider v 3.12.2, which now only supports DMG format
     scFile="/Applications/SuperCollider.app/"
     tmpDirSC=$(/usr/bin/mktemp -d /tmp/scDMG)
-    scURL="https://github.com/supercollider/supercollider/releases/download/Version-3.12.2/SuperCollider-3.12.2-macOS.dmg"
+    scURL="https://github.com/supercollider/supercollider/releases/download/Version-3.13.0/SuperCollider-3.13.0-macOS-universal.dmg"
 
-    curl -Lk "${scURL}" --output "${tmpDirSC}/sc3-12.dmg"
-    hdiutil attach "${tmpDirSC}/sc3-12.dmg" -nobrowse -quiet -mountpoint "${tmpDirSC}"
+    curl -Lk "${scURL}" --output "${tmpDirSC}/sc3-13.dmg"
+    hdiutil attach "${tmpDirSC}/sc3-13.dmg" -nobrowse -quiet -mountpoint "${tmpDirSC}"
     ditto "${tmpDirSC}/SuperCollider.app" "${scFile}"
     sleep 1
 # Detach the dmg and remove the temporary mountpoint
@@ -163,10 +167,15 @@ if [[ -f "$HOME/Library/Application Support/SuperCollider/Extensions/StkInst.scx
 	printf "${COLOR_PURPLE}[7]$normal sc3-plugins already installed, skipping...\n"
 else
 	printf "${COLOR_PURPLE}[7]$normal Installing SuperCollider sc-3 Plugins...\n"
-	curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.11.1/sc3-plugins-3.11.1-macOS-signed.zip --output /tmp/sc3plugins.zip
-	mkdir -p ~/Library/Application\ Support/SuperCollider/Extensions/
-	unzip -nq /tmp/sc3plugins.zip -d ~/Library/Application\ Support/SuperCollider/Extensions/
-	rm /tmp/sc3plugins.zip
+	curl -Lk https://github.com/supercollider/sc3-plugins/releases/download/Version-3.13.0/sc3-plugins-3.13.0-macOS.zip --output /tmp/sc3plugins.zip
+	/bin/mkdir -p ~/Library/Application\ Support/SuperCollider/Extensions/SC3Plugins
+	unzip -nq /tmp/sc3plugins.zip -d /tmp
+    # The directory containing the SC3 plugins is located in a SC3Plugins subdirectory of the ZIP.
+    # The 'mv' command creates _.* metadata files in plugin subdirectories which cause errors on SC boot;
+    #   'cp' does not have this side effect.
+    /bin/cp -R /tmp/sc3-plugins/SC3Plugins/* ~/Library/Application\ Support/SuperCollider/Extensions/SC3Plugins
+    /bin/rm -r /tmp/sc3-plugins
+	/bin/rm /tmp/sc3plugins.zip
 fi
 
 #### INSTALL SUPERDIRT
