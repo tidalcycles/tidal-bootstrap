@@ -38,6 +38,14 @@ normal='\033[0m'
 osName=$(uname -s)
 myArch=$(uname -m) #intel: x86_64  silicon: arm64
 
+_STARTUP_FILES=(
+    "${HOME}/.bashrc"
+    "${HOME}/.bash_profile"
+    "${HOME}/.bash_login"
+    "${HOME}/.profile"
+    "${HOME}/.zshrc"
+)
+
 ## test for macOS - exit script if not Darwin
 if test "${osName}" = "Darwin"; then
     printf "Installing Tidalcycles stack for:\n  os: ${osName}\n  arch: ${myArch}\n\n"
@@ -83,11 +91,21 @@ else
     curl https://get-ghcup.haskell.org -sSf | BOOTSTRAP_HASKELL_GHC_VERSION=latest BOOTSTRAP_HASKELL_CABAL_VERSION=latest BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh 2>&1 > /tmp/ghcup-install.log
     ## test to see if cabal exists - then add the env var to shell profiles
     if [ -e "${HOME}/.ghcup/bin/cabal" ]; then
-        printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ~/.bashrc and ~/.zshrc...\n"
-        echo 'source ${HOME}/.ghcup/env' >> "${HOME}/.bashrc"
-        echo 'source ${HOME}/.ghcup/env' >> "${HOME}/.zshrc"
+        _startupFileFound=false
+        for startupFile in "${_STARTUP_FILES[@]}"; do    
+            if [ -f "$startupFile" ]; then
+                printf "${COLOR_PURPLE}[2.1]$normal Adding ghcup initialisation to ${startupFile}...\n"
+                if ! grep -q "source ${HOME}/.ghcup/env" "$startupFile"; then
+                    echo 'source ${HOME}/.ghcup/env' >> "$startupFile"
+                fi
+                _startupFileFound=true
+            fi 
+        done
+        if [ "$_startupFileFound" = false ]; then
+            printf "Error: $startup_file not found. Haskell may not be installed correctly.\n"
+        fi
     else
-        printf "Error: Haskell pkg mgr cabal not found in ${HOME}/.ghcup/bin. "
+        printf "Error: Haskell pkg mgr cabal not found in ${HOME}/.ghcup/bin.\n"
     fi
 fi
 
